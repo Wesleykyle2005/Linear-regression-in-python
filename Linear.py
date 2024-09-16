@@ -46,7 +46,6 @@ def calcular_rv():
 def calcular_t():
     print("Realizar los calculos")
 
-def calcular_intervalos():
-    print("Realizar los calculos")
+
  
  
