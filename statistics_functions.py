@@ -33,7 +33,10 @@ def calcular_rv(scr, stc, registros):
     mcr = scr / 1
     sce = stc - scr
     mce = sce / (registros - 2)
-    rv = mcr / mce
+    if mce==0:
+        rv=1
+    else:    
+        rv = mcr / mce
     return rv, mcr, sce, mce
 
 # Función para calcular t
