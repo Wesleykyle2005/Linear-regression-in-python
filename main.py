@@ -31,8 +31,8 @@ def generar_campos():
         num_datos= int(entry_num_datos.get())
 
         if num_datos < 8:
-            messagebox.showwarning("Advertencia", "El número mínimo de datos es 8.")
-            num_datos = 8
+            messagebox.showwarning("Advertencia", "El número mínimo de datos es 5.")
+            num_datos = 5
         num_actual=len(variable_dependiente)
 
         if num_datos > num_actual:
