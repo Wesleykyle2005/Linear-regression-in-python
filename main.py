@@ -65,10 +65,6 @@ def generar_campos():
         print("Ingresar un número válido")
 
 
-
-
-     
-
 def realizar_calculos():
     # Convertir los valores de tk.DoubleVar a float
     x_values = [var.get() for var in variable_independiente]
@@ -88,18 +84,22 @@ def realizar_calculos():
     # Calcular el valor de rv
     rv, mcr, sce, mce = calcular_rv(scr, stc, registros)
 
-    # Calcular t
-    t_calculado, t_critico = calcular_t(b1, suma_x2, suma_x, registros, mce)
+    if mce == 0:
+        # Regresión perfecta: omitir cálculos adicionales
+        imprimir_resultados(b1, b0, r2, r, scr, stc, rv, mcr, sce, mce, None, None, None, None, None)
+        mostrar_grafica(x_values, y_values, b1, b0)
+        print("Regresión perfecta: no se requieren más cálculos.")
+        return
 
-    # Calcular F
+    # Calcular t y F si no hay regresión perfecta
+    t_calculado, t_critico = calcular_t(b1, suma_x2, suma_x, registros, mce)
     F_calculado, F_2calculado, F_critico = calcular_F(rv, t_calculado, registros)
 
     # Imprimir resultados
     imprimir_resultados(b1, b0, r2, r, scr, stc, rv, mcr, sce, mce, t_calculado, t_critico, F_calculado, F_2calculado, F_critico)
-    mostrar_grafica(x_values,y_values, b1, b0)
+    mostrar_grafica(x_values, y_values, b1, b0)
     resultado = analizar_regresion(b1, b0, r2, r, scr, stc, rv, mcr, sce, mce, t_calculado, t_critico, F_calculado, F_critico)
     print(resultado)
-
 
 
 def imprimir_resultados(b1, b0, r2, r, scr, stc, rv, mcr, sce, mce, t_calculado, t_critico, F_calculado, F_2calculado, F_critico):
@@ -111,6 +111,8 @@ def imprimir_resultados(b1, b0, r2, r, scr, stc, rv, mcr, sce, mce, t_calculado,
     print(f"F_calculado es: {F_calculado}, F_2calculado es: {F_2calculado}, F_critico es: {F_critico}")
 
 def mostrar_grafica(x_values,y_values, b1, b0):
+    print(f"Valores de x: {x_values}")
+    print(f"Valores de Y: {y_values}")
     line_x = np.array(x_values)
     line_y = b1*line_x+b0
     fig, ax = plt.subplots()
@@ -177,26 +179,66 @@ def analizar_regresion(b1, b0, r2, r, scr, stc, rv, mcr, sce, mce, t_calculado, 
     
     return mensaje_final
 
-ventana = tk.Tk()
-ventana.title("Anális de regresión simple")
 
-label_num_datos= tk.Label(ventana, text="Ingrese los datos:")
+
+# Función para cerrar el programa correctamente
+def on_closing():
+    if messagebox.askokcancel("Salir", "¿Deseas cerrar la aplicación?"):
+        ventana.quit()  # Detener el loop de Tkinter
+        ventana.destroy()  # Cerrar la ventana de forma segura
+
+# Función para centrar la ventana
+def centrar_ventana(ventana):
+    ventana.update_idletasks()  # Actualiza la ventana para obtener el tamaño
+    width = ventana.winfo_width()  # Ancho de la ventana
+    height = ventana.winfo_height()  # Altura de la ventana
+    x = (ventana.winfo_screenwidth() // 2) - (width // 2)  # Calcular posición X
+    y = (ventana.winfo_screenheight() // 2) - (height // 2)  # Calcular posición Y
+    ventana.geometry(f'{width+100}x{height+100}+{x}+{y}')  # Aplicar la geometría
+
+# Configurar la ventana principal
+ventana = tk.Tk()
+ventana.title("Análisis de regresión simple")
+
+# Llamar a la función para centrar la ventana después de que esté construida
+ventana.update()  # Actualiza la ventana para que obtenga su tamaño
+centrar_ventana(ventana)
+
+# Configurar el cierre del programa cuando se presiona la "X"
+ventana.protocol("WM_DELETE_WINDOW", on_closing)
+
+
+
+
+# Etiqueta de entrada
+label_num_datos = tk.Label(ventana, text="Ingrese el número de datos:")
 label_num_datos.pack()
 
-#Numero de campos a completar
-entry_num_datos= tk.Entry(ventana)
+
+# Entrada de datos
+entry_num_datos = tk.Entry(ventana)
 entry_num_datos.pack()
 
-#botón para generarlos
 button_generate_entry= tk.Button(ventana, text="Generar campos", command=generar_campos)
 button_generate_entry.pack()
 
-# Frame donde se generarán los campos 
-frame_campos=tk.Frame(ventana)
+# Frame donde se generarán los campos
+frame_campos = tk.Frame(ventana)
 frame_campos.pack()
 
-# Frame de la grafica
+# Frame de la gráfica
 frame_grafica = tk.Frame(ventana)
 frame_grafica.pack()
 
+# Mantener la ventana abierta
 ventana.mainloop()
+
+
+
+
+
+
+
+
+
+

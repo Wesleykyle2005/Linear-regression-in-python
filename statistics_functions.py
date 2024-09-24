@@ -1,5 +1,7 @@
 import math as ma
 import scipy.stats as stats
+import warnings  # Para lanzar advertencias
+from tkinter import messagebox
 
 # Función para calcular sumatorias
 def calcular_sumatorias(variable_independiente, variable_dependiente, registros):
@@ -8,7 +10,6 @@ def calcular_sumatorias(variable_independiente, variable_dependiente, registros)
     suma_x2 = sum([x**2 for x in variable_independiente])
     suma_y2 = sum([y**2 for y in variable_dependiente])
     suma_xy = sum([variable_independiente[i] * variable_dependiente[i] for i in range(registros)])
-
     return suma_x, suma_y, suma_x2, suma_xy, suma_y2
 
 # Función para calcular b1 (pendiente)
@@ -25,7 +26,12 @@ def calcular_b0(suma_x, suma_y, b1, registros):
 def calcular_r2(b1, suma_xy, suma_x, suma_y, suma_y2, registros):
     scr = b1 * (suma_xy - ((suma_x * suma_y) / registros))
     stc = suma_y2 - (suma_y**2 / registros)
-    r2 = scr / stc
+    
+    if stc == 0:
+        r2 = 1.0  # Caso de regresión perfecta
+    else:
+        r2 = scr / stc
+    
     return r2, ma.sqrt(r2), scr, stc
 
 # Función para calcular el valor de F
@@ -33,14 +39,21 @@ def calcular_rv(scr, stc, registros):
     mcr = scr / 1
     sce = stc - scr
     mce = sce / (registros - 2)
-    if mce==0:
-        rv=1
-    else:    
-        rv = mcr / mce
+    
+    # Caso de regresión perfecta (MCE = 0)
+    if mce == 0:
+        warnings.warn("Regresión perfecta detectada. Los cálculos de F y t no son necesarios.", UserWarning)
+        messagebox.showinfo("Importante","Regresión perfecta detectada. Los cálculos de F y t no son necesarios.")
+        return None, mcr, sce, mce
+    
+    rv = mcr / mce
     return rv, mcr, sce, mce
 
 # Función para calcular t
 def calcular_t(b1, suma_x2, suma_x, registros, mce):
+    if mce == 0:
+        return None, None  # Omitir cálculo si hay regresión perfecta
+
     t_calculado = b1 / (ma.sqrt(mce / (suma_x2 - (suma_x**2 / registros))))
     alpha = 0.05
     t_critico = stats.t.ppf(1 - alpha / 2, registros - 2)
@@ -48,6 +61,9 @@ def calcular_t(b1, suma_x2, suma_x, registros, mce):
 
 # Función para calcular F (análisis de varianza)
 def calcular_F(rv, t_calculado, registros):
+    if rv is None or t_calculado is None:
+        return None, None, None  # Omitir cálculo si hay regresión perfecta
+    
     F_calculado = rv
     F_2calculado = t_calculado**2
     alpha = 0.05
